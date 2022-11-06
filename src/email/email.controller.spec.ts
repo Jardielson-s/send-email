@@ -1,28 +1,19 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { Response } from 'express';
-import { IEmail } from '../shared/interfaces/IEmail.interface';
 import { EmailController } from './email.controller';
 import { EmailService } from './email.service';
-import { ResponseStub } from '../shared/test/stub/response.stub';
+import { ResponseStub, emailStub, messageStub } from '../shared/test/stub';
+import { EmailDto } from 'src/shared/dto/email.dto';
 
 describe(EmailController.name, () => {
   let controller: EmailController;
-  const message: IEmail = {
-    from: 'any-email@gmail.com',
-    to: 'any-email-to@gmail.com',
-    subject: 'any-subject',
-    body: 'any-body',
-  };
+  const message: EmailDto = messageStub;
   let response: Response;
+  let service: EmailService;
 
   beforeEach(async () => {
     response = ResponseStub();
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [EmailController],
-      providers: [EmailService],
-    }).compile();
-
-    controller = module.get<EmailController>(EmailController);
+    service = emailStub();
+    controller = new EmailController(service);
   });
 
   it('should be defined', () => {
@@ -34,6 +25,20 @@ describe(EmailController.name, () => {
   });
 
   it('should able called method execute', async () => {
+    const spyOnStatus = jest.spyOn(response, 'status');
+    const spyOnJson = jest.spyOn(response, 'json');
     await controller.sendEmail(message, response);
+    expect(spyOnStatus).toHaveBeenCalled();
+    expect(spyOnJson).toHaveBeenCalled();
+  });
+
+  it('should throw called method execute and response error is defined', async () => {
+    const spyOnStatus = jest.spyOn(response, 'status');
+    const spyOnJson = jest.spyOn(response, 'json');
+
+    jest.spyOn(service, 'send').mockRejectedValue({} as any);
+    await controller.sendEmail(message, response);
+    expect(spyOnStatus).toHaveBeenCalled();
+    expect(spyOnJson).toHaveBeenCalled();
   });
 });
