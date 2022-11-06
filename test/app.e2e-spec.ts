@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
@@ -16,6 +17,6 @@ describe('AppController (e2e)', () => {
   });
 
   it('/email/send (POST)', () => {
-    return request(app.getHttpServer()).post('/email/send').expect(200);
+    return request(app.getHttpServer()).post('/email/send').expect(500);
   });
 });

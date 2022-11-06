@@ -28,7 +28,11 @@ export class EmailController {
     @Body() body: EmailDto,
     @Res() res: Response,
   ): Promise<Response> {
-    this.service.send(body);
-    return res.status(200).json({ message: 'email send!' });
+    try {
+      await this.service.send(body);
+      return res.status(200).json({ message: 'email send!' });
+    } catch (error) {
+      return res.status(500).json({ message: 'Internal Error' });
+    }
   }
 }
